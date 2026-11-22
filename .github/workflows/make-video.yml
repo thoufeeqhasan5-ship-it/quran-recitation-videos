@@ -65,8 +65,8 @@ jobs:
 
       - name: Install Python tools
         run: |
-          pip install -q "torch==2.5.1" --index-url https://download.pytorch.org/whl/cpu
-          pip install -q "kokoro==0.9.4" soundfile transformers pillow requests playwright "opencv-python-headless==4.10.0.84"
+          pip install -q "torch==2.7.1" --index-url https://download.pytorch.org/whl/cpu
+          pip install -q "kokoro==0.9.4" soundfile "transformers>=4.48,<5" pillow requests playwright "opencv-python-headless==4.10.0.84"
           python -m playwright install --with-deps chromium
 
       - name: Make video
