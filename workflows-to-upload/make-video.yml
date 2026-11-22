@@ -1,0 +1,85 @@
+name: Make Quran video
+
+on:
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "Topic number (file in topics/, e.g. 01)"
+        required: true
+        default: "01"
+      voice:
+        description: "English narrator (bm = British, am = American; m = male, f = female)"
+        type: choice
+        options: [bm_george, bm_lewis, am_michael, am_adam, bf_emma, af_heart]
+        default: bm_george
+      recitation:
+        description: "Play the Arabic recitation of the ayah before its translation"
+        type: boolean
+        default: true
+      reciter:
+        description: "Reciter"
+        type: choice
+        options: [ar.alafasy, ar.husary, ar.minshawi, ar.abdulbasitmurattal, ar.mahermuaiqly]
+        default: ar.alafasy
+      translation:
+        description: "English translation of the ayah"
+        type: choice
+        options: [en.sahih, en.pickthall, en.yusufali]
+        default: en.sahih
+
+jobs:
+  video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PIXABAY_KEY: ${{ secrets.PIXABAY_KEY }}   # optional: better nature photos from Pixabay
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ffmpeg (fast static build)
+        uses: FedericoCarboni/setup-ffmpeg@v3
+
+      - name: Install espeak-ng (helps the voice with rare words)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq espeak-ng
+
+      - name: Download fonts (Amiri Quran, Amiri, Marcellus, Inter - all SIL Open Font Licence)
+        run: |
+          mkdir -p assets/fonts && cd assets/fonts
+          B=https://github.com/google/fonts/raw/main/ofl
+          get() { [ -s "$1" ] || curl -fsSL --retry 3 -o "$1" "$2" || echo "::warning::could not download $1"; }
+          get AmiriQuran-Regular.ttf "$B/amiriquran/AmiriQuran-Regular.ttf"
+          get Amiri-Regular.ttf      "$B/amiri/Amiri-Regular.ttf"
+          get Marcellus-Regular.ttf  "$B/marcellus/Marcellus-Regular.ttf"
+          get Inter.ttf              "$B/inter/Inter%5Bopsz%2Cwght%5D.ttf"
+          ls -la
+
+      - name: Cache the voice and depth models
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-kokoro-depth-v1
+
+      - name: Install Python tools
+        run: |
+          pip install -q "torch==2.5.1" --index-url https://download.pytorch.org/whl/cpu
+          pip install -q "kokoro==0.9.4" soundfile transformers pillow requests playwright "opencv-python-headless==4.10.0.84"
+          python -m playwright install --with-deps chromium
+
+      - name: Make video
+        env:
+          VOICE: ${{ github.event.inputs.voice }}
+          RECITATION: ${{ github.event.inputs.recitation }}
+          RECITER: ${{ github.event.inputs.reciter }}
+          TRANSLATION: ${{ github.event.inputs.translation }}
+        run: python scripts/make_video.py --topic "${{ github.event.inputs.topic }}"
+
+      - name: Download the video from here (kept 7 days)
+        uses: actions/upload-artifact@v4
+        with:
+          name: quran-${{ github.event.inputs.topic }}-${{ github.event.inputs.voice }}
+          path: out/
+          retention-days: 7

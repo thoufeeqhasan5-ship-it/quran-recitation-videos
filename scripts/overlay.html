@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: 'Amiri Quran'; src: url('../assets/fonts/AmiriQuran-Regular.ttf'); }
+  @font-face { font-family: 'Amiri'; src: url('../assets/fonts/Amiri-Regular.ttf'); }
+  @font-face { font-family: 'Marcellus'; src: url('../assets/fonts/Marcellus-Regular.ttf'); }
+  @font-face { font-family: 'Inter'; src: url('../assets/fonts/Inter.ttf'); font-weight: 100 900; }
+  html, body { margin: 0; background: transparent; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; color: #F5EFE0;
+           font-family: 'Inter', 'DejaVu Sans', sans-serif; }
+  #shade { position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(5,22,19,.72) 0%, rgba(5,22,19,0) 18%, rgba(5,22,19,0) 56%, rgba(5,22,19,.84) 100%); }
+  #main { position: absolute; inset: 0; }
+  #dim { position: absolute; inset: 0; background: rgba(5,22,19,.42); opacity: 0; }
+
+  #progress { position: absolute; left: 0; top: 0; height: 8px; width: 0; background: #D4AF6A; }
+
+  #brand { position: absolute; top: 70px; left: 56px; display: flex; align-items: center; gap: 14px;
+           padding: 10px 28px 10px 12px; border-radius: 999px; background: rgba(5,22,19,.74);
+           border: 2px solid rgba(212,175,106,.6); }
+  #brand img { width: 58px; height: 58px; }
+  #brand span { font-family: 'Marcellus', serif; font-size: 34px; color: #F5EFE0; line-height: 1; }
+  #brand b { color: #D4AF6A; font-weight: 400; }
+
+  #card { position: absolute; left: 0; right: 0; top: 330px; display: flex; justify-content: center; }
+  #cardInner { padding: 22px 46px 18px; background: #F5EFE0; color: #0F3D36; border-radius: 18px;
+               font-family: 'Marcellus', serif; font-size: 80px; line-height: 1.15; text-align: center; max-width: 900px;
+               box-shadow: 0 12px 40px rgba(0,0,0,.45); border-bottom: 10px solid #D4AF6A; }
+
+  #hook { position: absolute; left: 60px; right: 60px; top: 620px; display: flex; flex-direction: column;
+          align-items: center; opacity: 0; }
+  #hookText { padding: 26px 48px 22px; background: #F5EFE0; color: #0F3D36; border-radius: 22px;
+              font-family: 'Marcellus', serif; font-size: 100px; line-height: 1.12; text-align: center; max-width: 940px;
+              box-shadow: 0 18px 60px rgba(0,0,0,.6); border-bottom: 12px solid #D4AF6A; }
+  #hookSub { margin-top: 28px; font-weight: 700; font-size: 44px; color: #F5EFE0; padding: 10px 34px;
+             background: rgba(5,22,19,.8); border-radius: 999px; border: 3px solid #D4AF6A; letter-spacing: .02em; }
+
+  #cap { position: absolute; left: 70px; right: 70px; top: 1330px; text-align: center;
+         font-weight: 800; font-size: 70px; line-height: 1.22; color: #fff;
+         -webkit-text-stroke: 3px #05160F; paint-order: stroke fill;
+         text-shadow: 0 4px 18px rgba(0,0,0,.85); }
+
+  #ayah { position: absolute; left: 56px; right: 56px; top: 250px; height: 1400px; display: flex;
+          align-items: center; justify-content: center; opacity: 0; }
+  #panel { width: 100%; box-sizing: border-box; padding: 50px 54px 44px; border-radius: 30px;
+           background: rgba(5,22,19,.84); border: 3px solid rgba(212,175,106,.85);
+           box-shadow: 0 24px 80px rgba(0,0,0,.55); display: flex; flex-direction: column; align-items: center; gap: 30px; }
+  #ayahRef { font-weight: 600; font-size: 30px; letter-spacing: .16em; text-transform: uppercase; color: #D4AF6A; }
+  #ayahAr { direction: rtl; font-family: 'Amiri Quran', 'Amiri', 'FreeSerif', serif; font-size: 78px; line-height: 2.0;
+            text-align: center; color: #F5EFE0; }
+  #ayahRule { width: 160px; height: 2px; background: #D4AF6A; flex-shrink: 0; }
+  #ayahEn { font-family: 'Marcellus', serif; font-size: 48px; line-height: 1.38; text-align: center; color: #F5EFE0; }
+  #ayahCredit { font-size: 24px; color: rgba(245,239,224,.72); text-align: center; }
+
+  #credit { position: absolute; left: 40px; right: 40px; bottom: 54px; text-align: center;
+            font-size: 22px; color: rgba(255,255,255,.72); text-shadow: 0 2px 6px rgba(0,0,0,.9); }
+
+  #end { position: absolute; inset: 0; background: #0F3D36; display: flex; flex-direction: column;
+         align-items: center; justify-content: center; opacity: 0; }
+  #end img { width: 380px; height: 380px; }
+  #endName { margin-top: 34px; font-family: 'Marcellus', serif; font-size: 120px; color: #F5EFE0; line-height: 1; }
+  #endTag { margin-top: 20px; font-weight: 600; font-size: 34px; letter-spacing: .42em; color: #D4AF6A; margin-right: -.42em; }
+  #endSub { margin-top: 70px; font-weight: 600; font-size: 46px; color: #F5EFE0; padding: 14px 40px;
+            border: 3px solid #D4AF6A; border-radius: 999px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="shade"></div>
+  <div id="dim"></div>
+  <div id="main">
+    <div id="progress"></div>
+    <div id="brand"><img src="../assets/logo-mark.svg" alt=""><span>Qur’an <b>·</b> The Recitation</span></div>
+    <div id="card"><div id="cardInner"></div></div>
+    <div id="hook"><div id="hookText"></div><div id="hookSub"></div></div>
+    <div id="cap"></div>
+    <div id="ayah"><div id="panel">
+      <div id="ayahRef"></div>
+      <div id="ayahAr" lang="ar"></div>
+      <div id="ayahRule"></div>
+      <div id="ayahEn"></div>
+      <div id="ayahCredit"></div>
+    </div></div>
+    <div id="credit"></div>
+  </div>
+  <div id="end">
+    <img src="../assets/logo-mark.svg" alt="">
+    <div id="endName">Qur’an</div>
+    <div id="endTag">THE RECITATION</div>
+    <div id="endSub">Follow for a new story every day</div>
+  </div>
+</div>
+<script>
+let D, fitted = null;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const q = x => Math.round(x * 20) / 20;
+const $ = id => document.getElementById(id);
+function setup(d) { D = d; }
+function pick(list, t) { let r = null; for (const x of list || []) if (t >= x.start && t < x.end) r = x; return r; }
+
+// shrink the ayah text until the panel fits its box
+function fitAyah(a) {
+  $('ayahRef').textContent = a.ref; $('ayahAr').textContent = a.arabic;
+  $('ayahEn').textContent = a.english; $('ayahCredit').textContent = a.credit;
+  let ar = 78, en = 48;
+  for (let i = 0; i < 40; i++) {
+    $('ayahAr').style.fontSize = ar + 'px'; $('ayahEn').style.fontSize = en + 'px';
+    if ($('panel').scrollHeight <= 1380) break;
+    ar = Math.max(40, ar * 0.95); en = Math.max(30, en * 0.95);
+  }
+  fitted = a;
+}
+
+function render(t) {
+  $('progress').style.width = (clamp(t / D.endStart, 0, 1) * 1080).toFixed(0) + 'px';
+
+  // ayah panel: Arabic bright while it is recited, then the translation brightens while it is read
+  const a = pick(D.ayahs, t), ay = $('ayah');
+  let ayKey = '-', ayOp = 0;
+  if (a) {
+    if (fitted !== a) fitAyah(a);
+    const op = Math.min(clamp((t - a.start) / 0.4, 0, 1), clamp((a.end - t) / 0.4, 0, 1));
+    const reading = a.recite ? clamp((t - a.say + 0.2) / 0.5, 0, 1) : 1;
+    ay.style.opacity = q(op); ayOp = op;
+    ay.style.transform = 'translateY(' + Math.round((1 - op) * 30) + 'px)';
+    $('ayahAr').style.opacity = q(1 - 0.35 * reading);
+    $('ayahEn').style.opacity = q(0.45 + 0.55 * reading);
+    ayKey = a.start + '/' + q(op) + '/' + q(reading);
+  } else { ay.style.opacity = 0; }
+  $('dim').style.opacity = q(ayOp);
+
+  // fact card
+  const c = pick(D.cards, t), card = $('card'), ci = $('cardInner');
+  let cardKey = '-';
+  if (c && !a) {
+    if (ci.textContent !== c.text) ci.textContent = c.text;
+    const s = t - c.start;
+    const sc = s < 0.18 ? 0.6 + 0.5 * (s / 0.18) : (s < 0.3 ? 1.1 - 0.1 * ((s - 0.18) / 0.12) : 1);
+    const op = Math.min(clamp(s / 0.12, 0, 1), clamp((c.end - t) / 0.25, 0, 1));
+    card.style.transform = 'scale(' + q(sc) + ')'; card.style.opacity = q(op);
+    cardKey = c.text + q(sc) + q(op);
+  } else { card.style.opacity = 0; }
+
+  // opening hook
+  const h = D.hook, hk = $('hook');
+  let hookKey = '-';
+  if (h && t >= h.start && t < h.end) {
+    const ht = $('hookText'), hs = $('hookSub');
+    if (ht.textContent !== h.text) ht.textContent = h.text;
+    if (hs.textContent !== (h.sub || '')) hs.textContent = h.sub || '';
+    hs.style.display = h.sub ? 'block' : 'none';
+    const s = t - h.start;
+    const sc = s < 0.2 ? 0.55 + 0.6 * (s / 0.2) : (s < 0.34 ? 1.15 - 0.15 * ((s - 0.2) / 0.14) : 1);
+    const op = Math.min(clamp(s / 0.1, 0, 1), clamp((h.end - t) / 0.3, 0, 1));
+    hk.style.transform = 'scale(' + q(sc) + ')'; hk.style.opacity = q(op);
+    const so = q(clamp((s - 0.45) / 0.25, 0, 1));
+    hs.style.opacity = so;
+    hookKey = q(sc) + '/' + q(op) + '/' + so;
+  } else { hk.style.opacity = 0; }
+
+  // captions (not under the ayah panel)
+  const k = a ? null : pick(D.caps, t);
+  const capText = k ? k.text : '';
+  if ($('cap').textContent !== capText) $('cap').textContent = capText;
+
+  const cr = pick(D.credits, t), crt = cr ? cr.text : '';
+  if ($('credit').textContent !== crt) $('credit').textContent = crt;
+
+  const e = clamp((t - D.endStart) / 0.4, 0, 1);
+  $('end').style.opacity = q(e);
+  $('main').style.opacity = q(1 - e);
+
+  return [Math.round(clamp(t / D.endStart, 0, 1) * 540), ayKey, cardKey, hookKey, capText, crt, q(e)].join('|');
+}
+</script>
+</body>
+</html>
